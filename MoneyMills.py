@@ -5,8 +5,87 @@ import datetime
 import json
 
 
-# authenticate
+def requestOptionChain():       
+ 
+    # Ticker Symbol
+    print("\n")
+    ticker = input("Enter Ticker: ")
+    
+    # Call or Put
+    while True:
+        contractType = input("Enter the Contract Type (C/P): ")          
+        if contractType == 'C':
+            break
+        if contractType == 'P':
+            break
+        print("Incorrect Entry \n")
 
+
+    # Strike Price
+    strikePrice = input("Enter The Strike Price: ")
+    
+    # Expiration Date 
+    while True:   
+        contractExpirationDate = input("Enter The Expiration contract expiration Date (MM-DD-YY): ")
+        if len(contractExpirationDate) == 8:
+            break
+        print("Incorrect Entry \n")  
+        
+    dateFormatted = contractExpirationDate.replace('-','')    
+    
+    mm = dateFormatted[0] + dateFormatted[1]
+    dd = dateFormatted[2] + dateFormatted[3]
+    yy = dateFormatted[4] + dateFormatted[5]
+    
+    m = int(mm)
+    d = int(dd)
+    y = int(yy) + 2000
+    
+    expDate = datetime.date(year = y, month = m, day = d) 
+   
+    optionChainPrint(ticker,contractType,strikePrice,expDate)    
+    
+#_____________________________________________________________________________________________________________________________________________________
+
+# PRINT OPTION CHAIN FUNCTION 
+   
+def optionChainPrint(ticker,contractType,strikePrice,expDate):
+    
+    currentDate = datetime.date(year = 2021, month = 11, day = 30)
+    
+    # IF YOU WANT ONLY 1 CONTRACT
+    currentDate = expDate
+    
+    if contractType == 'C' :
+
+        response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.CALL, strike=strikePrice, from_date = currentDate, to_date = expDate)
+        
+        text = json.dumps(response.json())
+        
+        with open ('chainData.json','w') as f:
+            chainData = json.loads(text)
+            json.dump(chainData,f)
+        
+              
+        #normalDistribution1(chainData)
+        #print(json.dumps(response.json(), indent=4))  
+
+    elif contractType == 'P':
+        
+        response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.PUT, strike=strikePrice, from_date = currentDate, to_date = expDate)
+
+        print(json.dumps(response.json(), indent=4))
+        
+#______________________________________________________________________________________________________________________________________________________     
+        
+#def normalDistribution1(chainData):    
+    
+
+
+#def normalDistribution2():    
+    
+    
+#______________________________________________________________________________________________________________________________________________________
 
 try:
     c = auth.client_from_token_file(config.token_path, config.api_key)
@@ -16,65 +95,4 @@ except FileNotFoundError:
         c = auth.client_from_login_flow(
             driver, config.api_key, config.redirect_uri, config.token_path)
 
-
-
-# get price history for a symbol
-#r = c.get_price_history('TSLA',
-#        period_type=client.Client.PriceHistory.PeriodType.YEAR,
-#        period=client.Client.PriceHistory.Period.TWENTY_YEARS,
-#        frequency_type=client.Client.PriceHistory.FrequencyType.DAILY,
-#        frequency=client.Client.PriceHistory.Frequency.DAILY)
-
-#assert r.ok, r.raise_for_status()
-
-#print(json.dumps(r.json(), indent=4))
-
-
-
-
-ticker = input("Enter Ticker: ")
-
-print("\n")
-
-contractType = input("Enter Contract Type (C/P): ")
-
-print("\n")
-
-strikePrice = input("Enter The Strike Price: ")
-
-#print("\n")
-
-#GOOG_012122P620: GOOG Jan 21 2022 620 Put
-
-#expiration = input("Enter the Contract expiration date (MM-DD-YY): ")
-
-
-#to_date = expiration[0] +expiration_date[1] +expiration_date[3] +expiration_date[4] +expiration_date[6] +expiration_date[7]
-
-#correctInput = ticker+ '_' + dateFormat + contractType + strikePrice
-
-#print(correctInput)
-
-print("\n")
-
-#response = c.get_option_chain(ticker,contract_type = contractType, strike = strikePrice, to_date = dateFormat)
-
-#response = c.get_option_chain(ticker)
-
-if contractType == 'C' :
-
-   response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.CALL, strike=strikePrice)
-
-print(json.dumps(response.json(), indent=4))
-
-#if contractType == 'P' :
-
-#response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.PUT, strike=strikePrice)
-    
-#print(json.dumps(response.json(), indent=4))
-
-#if contractType == 'ALL':
-
-    #response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.ALL, strike=strikePrice)
-    
-#print(json.dumps(response.json(), indent=4))
+requestOptionChain()   
