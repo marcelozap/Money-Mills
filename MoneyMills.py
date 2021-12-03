@@ -1,3 +1,4 @@
+from os import EX_CANTCREAT
 from tda import auth, client
 #from tda.orders import EquityOrderBuilder, Duration, Session
 import config
@@ -26,62 +27,81 @@ def requestOptionChain():
     
     # Expiration Date 
     while True:   
-        contractExpirationDate = input("Enter The Expiration contract expiration Date (MM-DD-YY): ")
-        if len(contractExpirationDate) == 8:
+        contractexpDate = input("Enter The Expiration contract expiration Date (MM-DD-YY): ")
+        if len(contractexpDate) == 8:
             break
         print("Incorrect Entry \n")  
-        
-    dateFormatted = contractExpirationDate.replace('-','')    
     
-    mm = dateFormatted[0] + dateFormatted[1]
-    dd = dateFormatted[2] + dateFormatted[3]
-    yy = dateFormatted[4] + dateFormatted[5]
+    mm = contractexpDate[0] + contractexpDate[1]
+    dd = contractexpDate[3] + contractexpDate[4]
+    yy = contractexpDate[6] + contractexpDate[7]
     
-    m = int(mm)
-    d = int(dd)
-    y = int(yy) + 2000
-    
-    expDate = datetime.date(year = y, month = m, day = d) 
+    expDate = datetime.date(year = int(yy)+2000, month = int(mm), day = int(dd)) 
+
+    #Calculate days reminainig for expiration date
+    daysRemaining = expDate.day - datetime.datetime.now().day
+
+    formatDate = str(expDate.year) + "-" + str(expDate.month) + "-" + str(expDate.day) + ":" + str(daysRemaining)
    
-    optionChainPrint(ticker,contractType,strikePrice,expDate)    
-    
+    optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate)    
+
+    #2021-12-23:20
 #_____________________________________________________________________________________________________________________________________________________
+
+class searchTools:
+  def __init__(search, strike, date, file):
+    search.file = file
+    search.strike = strike
+    search.date = date
 
 # PRINT OPTION CHAIN FUNCTION 
    
-def optionChainPrint(ticker,contractType,strikePrice,expDate):
-    
-    currentDate = datetime.date(year = 2021, month = 11, day = 30)
-    
-    # IF YOU WANT ONLY 1 CONTRACT
-    currentDate = expDate
-    
+def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
+
+    #Set up Formats to insert into function
+    strikePrice = float(strikePrice)
+    strStrikePrice = str(strikePrice)
+
+
+
+
+
+    # FOR SAMPLE RUN
     if contractType == 'C' :
 
-        response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.CALL, strike=strikePrice, from_date = currentDate, to_date = expDate)
+        response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.CALL, strike=strikePrice, from_date = expDate, to_date = expDate)   
         
         text = json.dumps(response.json())
-        
-        with open ('chainData.json','w') as f:
-            chainData = json.loads(text)
-            json.dump(chainData,f)
-        
-              
-        #normalDistribution1(chainData)
-        #print(json.dumps(response.json(), indent=4))  
+        chainData = json.loads(text)
+
+        #SearchTools makes it easier to find information
+        s = searchTools(strStrikePrice,formatDate,chainData)    
+
+        print(getValue(s,'bid'))
 
     elif contractType == 'P':
         
-        response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.PUT, strike=strikePrice, from_date = currentDate, to_date = expDate)
+        response = c.get_option_chain(ticker, contract_type=c.Options.ContractType.PUT, strike=strikePrice, from_date = expDate, to_date = expDate)
+        
+        text = json.dumps(response.json())
+        chainData = json.loads(text)   
 
-        print(json.dumps(response.json(), indent=4))
+        s = searchTools(strStrikePrice,formatDate,chainData)  
+
+        print(getValue(s,'bid'))    
         
 #______________________________________________________________________________________________________________________________________________________     
-        
+
+
+#def setVariableValues(chainData,strStrikePrice,formatDate):
+
+        # SET ALL VARIABLES NEEDE DFOR EQUAITON HERE
+
+def getValue(s,keyWord):
+        return s.file['callExpDateMap'][s.date][s.strike][0][keyWord]     
+
 #def normalDistribution1(chainData):    
     
-
-
 #def normalDistribution2():    
     
     
