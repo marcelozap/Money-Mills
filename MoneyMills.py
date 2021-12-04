@@ -48,23 +48,22 @@ def requestOptionChain():
     #2021-12-23:20
 #_____________________________________________________________________________________________________________________________________________________
 
+#SearchTools makes it easier to find information
 class searchTools:
   def __init__(search, strike, date, file):
     search.file = file
     search.strike = strike
     search.date = date
+#_____________________________________________________________________________________________________________________________________________________
 
 # PRINT OPTION CHAIN FUNCTION 
-   
 def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
+
+    print('\n')
 
     #Set up Formats to insert into function
     strikePrice = float(strikePrice)
     strStrikePrice = str(strikePrice)
-
-
-
-
 
     # FOR SAMPLE RUN
     if contractType == 'C' :
@@ -77,7 +76,11 @@ def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
         #SearchTools makes it easier to find information
         s = searchTools(strStrikePrice,formatDate,chainData)    
 
-        print(getValue(s,'bid'))
+        getValue(s,'description')
+        getValue(s,'bid')
+        getValue(s,'ask')
+        getValue(s,'totalVolume')
+        getValue(s,'daysToExpiration')
 
     elif contractType == 'P':
         
@@ -88,7 +91,12 @@ def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
 
         s = searchTools(strStrikePrice,formatDate,chainData)  
 
-        print(getValue(s,'bid'))    
+        getValue(s,'description')
+        getValue(s,'bid')
+        getValue(s,'ask')
+        getValue(s,'totalVolume')
+        getValue(s,'daysToExpiration')
+
         
 #______________________________________________________________________________________________________________________________________________________     
 
@@ -98,7 +106,9 @@ def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
         # SET ALL VARIABLES NEEDE DFOR EQUAITON HERE
 
 def getValue(s,keyWord):
-        return s.file['callExpDateMap'][s.date][s.strike][0][keyWord]     
+    if keyWord != 'description':
+        print(keyWord + ':', end = ' ')
+    print(s.file['callExpDateMap'][s.date][s.strike][0][keyWord])
 
 #def normalDistribution1(chainData):    
     
@@ -115,4 +125,5 @@ except FileNotFoundError:
         c = auth.client_from_login_flow(
             driver, config.api_key, config.redirect_uri, config.token_path)
 
-requestOptionChain()   
+requestOptionChain()
+print('\n')
