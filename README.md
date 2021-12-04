@@ -1,3 +1,7 @@
 # Money-Mills
 # Statistical Stock Analysis Tool
-# Filter option chain data by using (Ticker, C/P, strikePrice)
+
+INSTALL REQUIREMENTS: 
+pip install tda-api
+
+# Filter option chain data through the request interface
