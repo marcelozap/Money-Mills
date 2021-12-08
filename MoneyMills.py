@@ -1,3 +1,4 @@
+from os import EX_CANTCREAT
 from tda import auth, client
 #from tda.orders import EquityOrderBuilder, Duration, Session
 import config
@@ -13,11 +14,11 @@ def requestOptionChain():
  
     # Ticker Symbol
     print("\n")
-    ticker = input("Enter Ticker: ").upper()
+    ticker = input("Enter Ticker: ")
     
     # Call Put
     while True:
-        contractType = input("Enter the Contract Type (C/P): ").upper()          
+        contractType = input("Enter the Contract Type (C/P): ")          
         if contractType == 'C':
             break
         if contractType == 'P':
@@ -45,6 +46,8 @@ def requestOptionChain():
     daysRemaining = expDate.day - datetime.datetime.now().day
 
     formatDate = str(expDate.year) + "-" + str(expDate.month) + "-" + str(expDate.day) + ":" + str(daysRemaining)
+    
+    # get stock price
    
     optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate)    
 
@@ -53,10 +56,11 @@ def requestOptionChain():
 
 #SearchTools makes it easier to find information
 class searchTools:
-  def __init__(search, strike, date, file):
+  def __init__(search, strike, date, file, last):
     search.file = file
     search.strike = strike
     search.date = date
+    search.last = last
 #_____________________________________________________________________________________________________________________________________________________
 
 # PRINT OPTION CHAIN FUNCTION 
@@ -75,17 +79,14 @@ def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
         
         text = json.dumps(response.json())
         chainData = json.loads(text)
-
-        #SearchTools makes it easier to find information
-        s = searchTools(strStrikePrice,formatDate,chainData)    
-
-        getValue(s,'description')
-        getValue(s,'bid')
-        getValue(s,'ask')
-        getValue(s,'totalVolume')
-        getValue(s,'daysToExpiration')
         
-        binomialDistribution(getValue(s,'daysToExpiration'), 160 ,getValue(s,'bid'), strikePrice)
+        last = chainData['underlyingPrice']
+        
+        #SearchTools makes it easier to find information
+        s = searchTools(strStrikePrice,formatDate,chainData,last)
+        
+        printDescription(s)    
+        binomialDistribution(s)
 
     elif contractType == 'P':
         
@@ -93,26 +94,26 @@ def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
         
         text = json.dumps(response.json())
         chainData = json.loads(text)   
+        
+        last = chainData['underlyingPrice']
 
-        s = searchTools(strStrikePrice,formatDate,chainData)  
-
-        getValue(s,'description')
-        getValue(s,'bid')
-        getValue(s,'ask')
-        getValue(s,'totalVolume')
-        getValue(s,'daysToExpiration')
+        #SearchTools makes it easier to find information
+        s = searchTools(strStrikePrice,formatDate,chainData, last)  
+        
+        printDescription(s)   
+        binomialDistribution(s)
 #______________________________________________________________________________________________________________________________________________________     
 
-#def setVariableValues(chainData,strStrikePrice,formatDate):
-
-        # SET ALL VARIABLES NEEDED FOR EQUATION HERE
 
 def getValue(s,keyWord):
-    if keyWord != 'description':
-        print(keyWord + ':', end = ' ')
-    print(s.file['callExpDateMap'][s.date][s.strike][0][keyWord])
-
-
+    return s.file['callExpDateMap'][s.date][s.strike][0][keyWord]
+  
+def printDescription(s):
+    keyword = {'description','last','daysToExpiration'}
+    for key in keyword:
+            print(key + ':', end = ' ')
+            print(s.file['callExpDateMap'][s.date][s.strike][0][key])
+#______________________________________________________________________________________________________________________________________________________              
     
 def binomialDistribution(s):   
         
@@ -178,7 +179,19 @@ def binomialDistribution(s):
     for i in range(N - 2,-1,-1):
         for j in range(i + 1):
             callPriceMatrix[i,j] = numpy.exp(-irate * timeChange) * ((1-prob) * callPriceMatrix[i+1,j] + prob * callPriceMatrix[i+1,j+1])
-        
+   
+    print('\n')   
+    print("Projected Model Price Yield: ", end = ' ')         
+    print(callPriceMatrix[0][0])     
+    
+    print('\n')  
+    
+    print(stockPriceMatrix)
+    
+    print('\n')  
+    
+    print(callPriceMatrix) 
+    
 #______________________________________________________________________________________________________________________________________________________
 
 try:
@@ -190,7 +203,5 @@ except FileNotFoundError:
             driver, config.api_key, config.redirect_uri, config.token_path)
 
 requestOptionChain()
-
 print('\n')
 
-#stockPriceMatrix = csc_matrix( (N,N) )
