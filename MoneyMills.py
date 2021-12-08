@@ -5,6 +5,10 @@ import config
 import datetime
 import json
 
+import numpy
+#import matplotlib.pyplot as plt
+from scipy.sparse import csc_matrix
+
 
 def requestOptionChain():       
  
@@ -12,7 +16,7 @@ def requestOptionChain():
     print("\n")
     ticker = input("Enter Ticker: ")
     
-    # Call or Put
+    # Call Put
     while True:
         contractType = input("Enter the Contract Type (C/P): ")          
         if contractType == 'C':
@@ -81,6 +85,8 @@ def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
         getValue(s,'ask')
         getValue(s,'totalVolume')
         getValue(s,'daysToExpiration')
+        
+        binomialDistribution(getValue(s,'daysToExpiration'), 160 ,getValue(s,'bid'), strikePrice)
 
     elif contractType == 'P':
         
@@ -96,8 +102,6 @@ def optionChainPrint(ticker,contractType,strikePrice,expDate,formatDate):
         getValue(s,'ask')
         getValue(s,'totalVolume')
         getValue(s,'daysToExpiration')
-
-        
 #______________________________________________________________________________________________________________________________________________________     
 
 
@@ -109,10 +113,24 @@ def getValue(s,keyWord):
     if keyWord != 'description':
         print(keyWord + ':', end = ' ')
     print(s.file['callExpDateMap'][s.date][s.strike][0][keyWord])
-
-#def normalDistribution1(chainData):    
+  
     
-#def normalDistribution2():    
+def binomialDistribution(daysToExpiration, stockPrice, bid, strikePrice ):   
+    
+    #VARIABLE SETUP
+    
+    S0 = stockPrice
+    t = daysToExpiration
+    u = 1.05
+    d = 1/u
+    p = 0.6
+    
+    K = strikePrice
+    
+    sxu = S0 * u
+    sxd = S0 * d
+    
+    print (sxu, sxd)
     
     
 #______________________________________________________________________________________________________________________________________________________
@@ -126,4 +144,8 @@ except FileNotFoundError:
             driver, config.api_key, config.redirect_uri, config.token_path)
 
 requestOptionChain()
+
 print('\n')
+
+#stockPriceMatrix = csc_matrix( (N,N) )
+
