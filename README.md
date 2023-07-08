@@ -1,5 +1,5 @@
 # Money-Mills
-# Statistical Stock Analysis Tool
+# Statistical Stock Analysis Tool using Terminal
 
 INSTALL REQUIREMENTS: 
 pip install tda-api
